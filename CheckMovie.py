@@ -14,17 +14,19 @@ def getNum(num):
             resImg[H][W][2] = numImg[H*6:H*6+6,W*6:W*6+6,2].mean()
     return resImg
 
-def prossesingMovie(image,W,H):
-    prossesingImg = image[58:86,82:110]
-    num = play.play(prossesingImg)
-    image[58,81:111]=[255,255,255]
-    image[87,81:111]=[255,255,255]
-    image[57:87, 82]=[255,255,255]
-    image[57:87,111]=[255,255,255]
+def prossesingMovie(image,W,H,count):
+    #中央480x480の画像を使う
+    imgVert = [H // 2 - 240 , W // 2 - 240 ]
+    prossesingImg = image[imgVert[0] : imgVert[0] + 480 , imgVert[1] : imgVert[1]+480 ]
+    num = play.play(prossesingImg,count)
+    image[imgVert[0]-20:imgVert[0],:]=[255,255,255]
+    image[imgVert[0]+480-20:480+imgVert[0],:]=[255,255,255]
+    image[:,imgVert[1]-20:imgVert[1]]=[255,255,255]
+    image[:,imgVert[1]-20+480:480+imgVert[1]]=[255,255,255]
     image[10:60,150:180] = getNum(num)
 
 
-path = 'learnNum.mp4'
+path = 'fs.wmv'
 cap = cv2.VideoCapture(path)
 Width = int(cap.get(3))
 Height = int(cap.get(4))
@@ -36,22 +38,24 @@ count=0
 while(cap.isOpened()):
     ret, frame = cap.read()
     if ret==True:
-        prossesingMovie(frame,Width,Height)
+        prossesingMovie(frame,Width,Height,count)
         # write the flipped frame　　
         out.write(frame)           #output.aviにframe毎書込み
         # cv2.imshow('frame',frame)  #反転frameを表示
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        
     else:
         break
-    if count == 1000:
+    if count == 100:
         cv2.imwrite('print.jpg', frame)
+    # #とりあえず切る
+    # break   
     
     count +=1
-    if count % 20 == 0:
+    if count % 10 == 0:
         print(count)
     else:
-        print('{},'.format(count),)
+        print('{},'.format(count),end='')
+    
     
 # Release everything if job is finished
 cap.release()
